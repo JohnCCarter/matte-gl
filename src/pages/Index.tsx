@@ -1,16 +1,52 @@
-// Update this page (the content is just a fallback if you fail to update the page)
+import { useState } from 'react';
+import { Category, Difficulty } from '@/lib/mathEngine';
+import { StartScreen } from '@/components/StartScreen';
+import { PracticeScreen } from '@/components/PracticeScreen';
+import { SummaryScreen } from '@/components/SummaryScreen';
 
-// IMPORTANT: Fully REPLACE this with your own code
-const PlaceholderIndex = () => {
-  // PLACEHOLDER: Replace this entire return statement with the user's app.
-  // The inline background color is intentionally not part of the design system.
+type Screen = 'start' | 'practice' | 'summary';
+
+const Index = () => {
+  const [screen, setScreen] = useState<Screen>('start');
+  const [category, setCategory] = useState<Category>('addition');
+  const [difficulty, setDifficulty] = useState<Difficulty>('easy');
+  const [results, setResults] = useState({ correct: 0, total: 0 });
+
+  const handleStart = (cat: Category, diff: Difficulty) => {
+    setCategory(cat);
+    setDifficulty(diff);
+    setScreen('practice');
+  };
+
+  const handleFinish = (correct: number, total: number) => {
+    setResults({ correct, total });
+    setScreen('summary');
+  };
+
+  const handleRestart = () => {
+    setScreen('start');
+  };
+
   return (
-    <div className="flex min-h-screen items-center justify-center" style={{ backgroundColor: '#fcfbf8' }}>
-      <img data-lovable-blank-page-placeholder="REMOVE_THIS" src="/placeholder.svg" alt="Your app will live here!" />
+    <div className="min-h-screen bg-background">
+      {screen === 'start' && <StartScreen onStart={handleStart} />}
+      {screen === 'practice' && (
+        <PracticeScreen
+          category={category}
+          difficulty={difficulty}
+          onFinish={handleFinish}
+          onQuit={handleRestart}
+        />
+      )}
+      {screen === 'summary' && (
+        <SummaryScreen
+          correct={results.correct}
+          total={results.total}
+          onRestart={handleRestart}
+        />
+      )}
     </div>
   );
 };
-
-const Index = PlaceholderIndex;
 
 export default Index;
