@@ -4,6 +4,7 @@ import { useState, useMemo } from 'react';
 
 interface StartScreenProps {
   onStart: (category: Category, difficulty: Difficulty) => void;
+  onParentView: () => void;
 }
 
 const categories: Category[] = ['addition', 'multiplication', 'division', 'mixed'];
@@ -28,7 +29,7 @@ function handleSurprise(onStart: (cat: Category, diff: Difficulty) => void) {
   onStart(cat, diff);
 }
 
-export function StartScreen({ onStart }: StartScreenProps) {
+export function StartScreen({ onStart, onParentView }: StartScreenProps) {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
   const stats = useMemo(() => getStats(), []);
 
@@ -101,6 +102,14 @@ export function StartScreen({ onStart }: StartScreenProps) {
           ))}
         </div>
       )}
+
+      {/* Parent link */}
+      <button
+        onClick={onParentView}
+        className="mt-8 text-sm font-body text-muted-foreground hover:text-foreground transition-colors"
+      >
+        📊 För vuxna
+      </button>
     </div>
   );
 }

@@ -3,9 +3,10 @@ import { Category, Difficulty } from '@/lib/mathEngine';
 import { StartScreen } from '@/components/StartScreen';
 import { PracticeScreen } from '@/components/PracticeScreen';
 import { SummaryScreen } from '@/components/SummaryScreen';
+import { ParentView } from '@/components/ParentView';
 import { saveRound } from '@/lib/progressStore';
 
-type Screen = 'start' | 'practice' | 'summary';
+type Screen = 'start' | 'practice' | 'summary' | 'parent';
 
 const Index = () => {
   const [screen, setScreen] = useState<Screen>('start');
@@ -29,9 +30,14 @@ const Index = () => {
     setScreen('start');
   };
 
+  const handleStartWithDifficulty = (diff: Difficulty) => {
+    setDifficulty(diff);
+    setScreen('practice');
+  };
+
   return (
     <div className="min-h-screen bg-background">
-      {screen === 'start' && <StartScreen onStart={handleStart} />}
+      {screen === 'start' && <StartScreen onStart={handleStart} onParentView={() => setScreen('parent')} />}
       {screen === 'practice' && (
         <PracticeScreen
           category={category}
@@ -44,9 +50,13 @@ const Index = () => {
         <SummaryScreen
           correct={results.correct}
           total={results.total}
+          category={category}
+          difficulty={difficulty}
           onRestart={handleRestart}
+          onStartWithDifficulty={handleStartWithDifficulty}
         />
       )}
+      {screen === 'parent' && <ParentView onBack={handleRestart} />}
     </div>
   );
 };
