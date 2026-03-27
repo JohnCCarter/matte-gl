@@ -1,6 +1,7 @@
 import { useState, useCallback, useEffect, useRef } from 'react';
 import { Category, Difficulty, MathQuestion, generateQuestion, getHints, QUESTIONS_PER_ROUND, categoryLabels, difficultyLabels } from '@/lib/mathEngine';
 import { ArtCanvas } from './ArtCanvas';
+import { Confetti } from './Confetti';
 
 interface PracticeScreenProps {
   category: Category;
@@ -33,6 +34,7 @@ export function PracticeScreen({ category, difficulty, onFinish, onQuit }: Pract
   const [correctCount, setCorrectCount] = useState(0);
   const [streak, setStreak] = useState(0);
   const [attempts, setAttempts] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
 
   const allHints = useCallback(() => getHints(question), [question]);
@@ -56,7 +58,6 @@ export function PracticeScreen({ category, difficulty, onFinish, onQuit }: Pract
       setStreak((s) => s + 1);
     } else {
       if (attempts === 0) {
-        // First wrong attempt — let her retry with a hint
         setFeedback('retry');
         setEncouragement(randomEncouragement());
         setShownHints(Math.min(1, hints.length));
@@ -64,7 +65,6 @@ export function PracticeScreen({ category, difficulty, onFinish, onQuit }: Pract
         setAnswer('');
         setStreak(0);
       } else {
-        // Second wrong attempt — move on without showing answer
         setFeedback('wrong');
         setEncouragement(randomEncouragement());
         setShownHints(hints.length);
@@ -103,6 +103,24 @@ export function PracticeScreen({ category, difficulty, onFinish, onQuit }: Pract
 
   return (
     <div className="flex flex-col min-h-screen px-5 py-6 max-w-md mx-auto">
+      {/* Confetti */}
+      <Confetti show={feedback === 'correct'} />
+
+      {/* Pause overlay */}
+      {isPaused && (
+        <div className="fixed inset-0 z-40 flex flex-col items-center justify-center bg-background/95">
+          <p className="text-6xl mb-6">🌸</p>
+          <p className="text-2xl font-display text-foreground mb-2">Ta en paus!</p>
+          <p className="text-lg font-body text-muted-foreground mb-8">Du gör jättebra. Andas lugnt.</p>
+          <button
+            onClick={() => setIsPaused(false)}
+            className="h-14 px-10 rounded-2xl bg-primary text-primary-foreground font-bold font-body text-lg shadow-playful hover:shadow-lifted active:scale-95 transition-all"
+          >
+            ▶ Fortsätt
+          </button>
+        </div>
+      )}
+
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <button onClick={onQuit} className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors">
@@ -111,9 +129,9 @@ export function PracticeScreen({ category, difficulty, onFinish, onQuit }: Pract
         <span className="text-base font-body font-bold text-foreground">
           {questionNum} av {QUESTIONS_PER_ROUND}
         </span>
-        <span className="text-sm font-body text-muted-foreground">
-          {difficultyLabels[difficulty]}
-        </span>
+        <button onClick={() => setIsPaused(true)} className="text-sm font-body text-muted-foreground hover:text-foreground transition-colors">
+          ⏸ Paus
+        </button>
       </div>
 
       {/* Progress */}

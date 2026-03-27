@@ -3,6 +3,7 @@ import { Category, Difficulty } from '@/lib/mathEngine';
 import { StartScreen } from '@/components/StartScreen';
 import { PracticeScreen } from '@/components/PracticeScreen';
 import { SummaryScreen } from '@/components/SummaryScreen';
+import { saveRound } from '@/lib/progressStore';
 
 type Screen = 'start' | 'practice' | 'summary';
 
@@ -20,6 +21,7 @@ const Index = () => {
 
   const handleFinish = (correct: number, total: number) => {
     setResults({ correct, total });
+    saveRound(category, difficulty, correct, total);
     setScreen('summary');
   };
 
