@@ -1,4 +1,4 @@
-import { Category, Difficulty, categoryLabels } from './mathEngine';
+import { Category, Difficulty, categoryLabels, categoryEmojis } from './mathEngine';
 
 interface RoundResult {
   category: Category;
@@ -114,4 +114,39 @@ export function getDetailedStats() {
 
 export function clearProgress() {
   localStorage.removeItem(STORAGE_KEY);
+}
+
+interface Milestone {
+  label: string;
+  emoji: string;
+  achieved: boolean;
+}
+
+export function getMilestones(): Milestone[] {
+  const rounds = getRounds();
+  const total = rounds.length;
+  const totalCorrect = rounds.reduce((s, r) => s + r.correct, 0);
+  const categories: Category[] = ['addition', 'multiplication', 'division', 'mixed'];
+  const categoriesPlayed = new Set(rounds.map(r => r.category));
+  const perfectRounds = rounds.filter(r => r.correct === r.total).length;
+
+  const milestones: Milestone[] = [
+    { label: 'Första omgången!', emoji: '🎉', achieved: total >= 1 },
+    { label: '5 omgångar klara!', emoji: '🔥', achieved: total >= 5 },
+    { label: '10 omgångar klara!', emoji: '💫', achieved: total >= 10 },
+    { label: '20 omgångar klara!', emoji: '🏅', achieved: total >= 20 },
+    { label: 'Första perfekta omgången!', emoji: '🌟', achieved: perfectRounds >= 1 },
+    { label: '10 rätt totalt!', emoji: '✨', achieved: totalCorrect >= 10 },
+    { label: '50 rätt totalt!', emoji: '🚀', achieved: totalCorrect >= 50 },
+  ];
+
+  categories.forEach(cat => {
+    milestones.push({
+      label: `Testat ${categoryLabels[cat]}!`,
+      emoji: categoryEmojis[cat],
+      achieved: categoriesPlayed.has(cat),
+    });
+  });
+
+  return milestones;
 }
