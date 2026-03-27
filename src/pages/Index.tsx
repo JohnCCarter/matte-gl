@@ -4,9 +4,10 @@ import { StartScreen } from '@/components/StartScreen';
 import { PracticeScreen } from '@/components/PracticeScreen';
 import { SummaryScreen } from '@/components/SummaryScreen';
 import { ParentView } from '@/components/ParentView';
+import { MyJourneyView } from '@/components/MyJourneyView';
 import { saveRound } from '@/lib/progressStore';
 
-type Screen = 'start' | 'practice' | 'summary' | 'parent';
+type Screen = 'start' | 'practice' | 'summary' | 'parent' | 'journey';
 
 const Index = () => {
   const [screen, setScreen] = useState<Screen>('start');
@@ -37,7 +38,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-background">
-      {screen === 'start' && <StartScreen onStart={handleStart} onParentView={() => setScreen('parent')} />}
+      {screen === 'start' && <StartScreen onStart={handleStart} onParentView={() => setScreen('parent')} onJourney={() => setScreen('journey')} />}
       {screen === 'practice' && (
         <PracticeScreen
           category={category}
@@ -57,6 +58,7 @@ const Index = () => {
         />
       )}
       {screen === 'parent' && <ParentView onBack={handleRestart} />}
+      {screen === 'journey' && <MyJourneyView onBack={handleRestart} />}
     </div>
   );
 };

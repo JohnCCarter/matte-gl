@@ -5,6 +5,7 @@ import { useState, useMemo } from 'react';
 interface StartScreenProps {
   onStart: (category: Category, difficulty: Difficulty) => void;
   onParentView: () => void;
+  onJourney: () => void;
 }
 
 const categories: Category[] = ['addition', 'multiplication', 'division', 'mixed'];
@@ -29,15 +30,30 @@ function handleSurprise(onStart: (cat: Category, diff: Difficulty) => void) {
   onStart(cat, diff);
 }
 
-export function StartScreen({ onStart, onParentView }: StartScreenProps) {
+export function StartScreen({ onStart, onParentView, onJourney }: StartScreenProps) {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const [titleClicks, setTitleClicks] = useState(0);
   const stats = useMemo(() => getStats(), []);
+
+  const handleTitleClick = () => {
+    const next = titleClicks + 1;
+    setTitleClicks(next);
+    if (next >= 3) {
+      setTitleClicks(0);
+      onParentView();
+    }
+  };
 
   return (
     <div className="flex flex-col items-center px-4 py-6 min-h-screen">
       {/* Header */}
       <div className="text-center mb-6 animate-pop-in">
-        <h1 className="text-4xl font-display text-foreground mb-2">🎨 Matteateljén</h1>
+        <h1
+          className="text-4xl font-display text-foreground mb-2 cursor-default select-none"
+          onClick={handleTitleClick}
+        >
+          🎨 Matteateljén
+        </h1>
         <p className="text-lg font-body text-muted-foreground">Öva matte och måla!</p>
       </div>
 
@@ -103,12 +119,12 @@ export function StartScreen({ onStart, onParentView }: StartScreenProps) {
         </div>
       )}
 
-      {/* Parent link */}
+      {/* Journey link */}
       <button
-        onClick={onParentView}
-        className="mt-8 text-sm font-body text-muted-foreground hover:text-foreground transition-colors"
+        onClick={onJourney}
+        className="mt-8 px-5 py-3 rounded-2xl bg-yellow/20 text-foreground font-body font-bold hover:bg-yellow/30 transition-colors"
       >
-        📊 För vuxna
+        🌟 Min resa
       </button>
     </div>
   );
