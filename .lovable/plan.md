@@ -1,55 +1,40 @@
 
 
-# Plan: Adaptiv svårighetsgrad + Föräldra-/lärarvy
+# Plan: Barnvänlig "Min resa 🌟"-vy + dold föräldralänk
 
-## 1. Adaptiv svårighetsgrad
+## Problemet
+Dottern kommer att klicka på "📊 För vuxna" — det syns tydligt på startsidan. Föräldravyn visar procent och svaghetsjämförelser som kan kännas negativt.
 
-After each round, suggest a difficulty change based on performance.
+## Lösning
 
-**`src/lib/progressStore.ts`** — add helper:
-- `getSuggestedDifficulty(category)` — looks at last 2-3 rounds for that category:
-  - ≥80% correct → suggest next harder level
-  - ≤40% correct → suggest next easier level
-  - Otherwise → stay at current level
-- Returns `{ suggested: Difficulty, reason: string }` (e.g. "Du klarade 90%! Redo för nästa nivå?")
+### A. Byt ut den synliga "För vuxna"-länken mot "Min resa 🌟"
+Den nya knappen på startsidan leder till en barnvänlig vy som visar framsteg positivt.
 
-**`src/components/SummaryScreen.tsx`** — show suggestion:
-- After showing the score, display a suggestion card: "Du verkar redo för Lagom-nivån! 🚀" with a button to start at the suggested level
-- Also keep the regular "Spela igen" button
-- Pass `category` and `difficulty` as new props
+### B. Ny komponent: `MyJourneyView.tsx`
+En glad, visuell vy som visar:
+- **Totala stjärnor** — 1 stjärna per avklarad omgång, visas som en rad ⭐-emojis
+- **Milstolpar** — t.ex. "🎉 Första gången Division!", "🔥 5 omgångar klara!", "🌟 10 rätt i rad!"
+- **Senaste omgångar** — enkla kort med emoji + kategori + "3 av 5 rätt! Bra!" (positivt formulerat, inga procent)
+- **Ämnen utforskade** — visar vilka ämnen hon provat med färgglada badges, inte jämförelser
 
-**`src/pages/Index.tsx`** — pass category/difficulty to SummaryScreen, add `handleStartWithDifficulty` handler
+Inget "kan öva mer på", inga procent, ingen röd färg.
 
-## 2. Föräldra-/lärarvy
+### C. Föräldravyn blir gömd
+Flytta "📊 För vuxna" till en dold åtkomst — t.ex. tryck 3 gånger på rubriken "Matteateljén" för att öppna föräldravyn. Barnet hittar den inte av misstag.
 
-A simple stats page accessible from the start screen, showing per-category performance over time. No login needed — it reads from the same localStorage data.
+### D. Milstolpar i progressStore
+Lägg till en `getMilestones()`-funktion som returnerar uppnådda milstolpar baserat på sparad data:
+- Första omgången
+- Första gången per kategori
+- 5, 10, 20 omgångar totalt
+- 3+ rätt i en omgång
 
-**New file: `src/components/ParentView.tsx`**
-- Accessed via a small "📊 För vuxna" link on the start screen
-- Shows:
-  - Total rounds, total correct/questions, overall percentage
-  - Per-category breakdown: a simple table/cards showing category name, rounds played, accuracy %
-  - Per-difficulty breakdown: same format
-  - Last 10 rounds list with date, category, difficulty, score
-  - A "strength/weakness" summary: "Starkast i: Addition ✅" / "Kan öva mer på: Division 📝"
-- A "← Tillbaka" button to return to start screen
-- A "🗑 Rensa data" button with confirmation
+## Filändringar
 
-**`src/lib/progressStore.ts`** — add helpers:
-- `getDetailedStats()` — returns per-category and per-difficulty aggregates
-- `clearProgress()` — clears localStorage
-
-**`src/pages/Index.tsx`** — add `'parent'` screen state, render ParentView
-
-**`src/components/StartScreen.tsx`** — add small "📊 För vuxna" link, accepting an `onParentView` prop
-
-## Summary of changes
-
-| File | Change |
+| Fil | Ändring |
 |---|---|
-| `src/lib/progressStore.ts` | Add `getSuggestedDifficulty()`, `getDetailedStats()`, `clearProgress()` |
-| `src/components/SummaryScreen.tsx` | Show adaptive difficulty suggestion after score |
-| `src/components/ParentView.tsx` | New — stats dashboard for parents/teachers |
-| `src/components/StartScreen.tsx` | Add "För vuxna" link |
-| `src/pages/Index.tsx` | Wire up parent view screen + pass category/difficulty to summary |
+| `src/components/MyJourneyView.tsx` | Ny — barnvänlig framstegsvy |
+| `src/lib/progressStore.ts` | Lägg till `getMilestones()` |
+| `src/components/StartScreen.tsx` | Byt synlig länk till "Min resa 🌟", göm föräldralänk bakom trippelklick på rubriken |
+| `src/pages/Index.tsx` | Lägg till `'journey'` screen-state, rendera MyJourneyView |
 
