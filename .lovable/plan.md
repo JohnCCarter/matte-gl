@@ -1,57 +1,55 @@
 
 
-# Plan: 4 förbättringar för Matteateljén
+# Plan: Adaptiv svårighetsgrad + Föräldra-/lärarvy
 
-## 1. "Överraska mig!"-knapp på startsidan
-Add a prominent button at the top of the category list that picks a random category and difficulty, then starts immediately. Reduces decision fatigue.
+## 1. Adaptiv svårighetsgrad
 
-**File: `StartScreen.tsx`**
-- Add a large "🎲 Överraska mig!" button before the category cards
-- On click, randomly pick a category + difficulty and call `onStart` directly
+After each round, suggest a difficulty change based on performance.
 
-## 2. Konfetti-effekt vid rätt svar
-Add a lightweight canvas-based confetti burst when the child answers correctly. No external library needed — a simple particle animation using a temporary canvas overlay.
+**`src/lib/progressStore.ts`** — add helper:
+- `getSuggestedDifficulty(category)` — looks at last 2-3 rounds for that category:
+  - ≥80% correct → suggest next harder level
+  - ≤40% correct → suggest next easier level
+  - Otherwise → stay at current level
+- Returns `{ suggested: Difficulty, reason: string }` (e.g. "Du klarade 90%! Redo för nästa nivå?")
 
-**New file: `src/components/Confetti.tsx`**
-- A component that renders a full-screen canvas overlay with colorful particles
-- Auto-removes after ~2 seconds
-- Triggered by a `show` prop
+**`src/components/SummaryScreen.tsx`** — show suggestion:
+- After showing the score, display a suggestion card: "Du verkar redo för Lagom-nivån! 🚀" with a button to start at the suggested level
+- Also keep the regular "Spela igen" button
+- Pass `category` and `difficulty` as new props
 
-**File: `PracticeScreen.tsx`**
-- Import and render `<Confetti show={feedback === 'correct'} />` on correct answer
-- No sound (keeping it simple and school-friendly)
+**`src/pages/Index.tsx`** — pass category/difficulty to SummaryScreen, add `handleStartWithDifficulty` handler
 
-## 3. Spara framsteg i localStorage
-Track completed rounds with scores so the child can see progress over time. Show a simple stats section on the start screen.
+## 2. Föräldra-/lärarvy
 
-**New file: `src/lib/progressStore.ts`**
-- `saveRound(category, difficulty, correct, total)` — appends to a JSON array in localStorage
-- `getStats()` — returns total rounds played, total correct, total questions, best streak
-- `getRecentRounds(n)` — returns last N rounds
+A simple stats page accessible from the start screen, showing per-category performance over time. No login needed — it reads from the same localStorage data.
 
-**File: `StartScreen.tsx`**
-- Import stats and show a small summary card below the header: "Du har spelat X omgångar! 🌟 Y rätt totalt"
+**New file: `src/components/ParentView.tsx`**
+- Accessed via a small "📊 För vuxna" link on the start screen
+- Shows:
+  - Total rounds, total correct/questions, overall percentage
+  - Per-category breakdown: a simple table/cards showing category name, rounds played, accuracy %
+  - Per-difficulty breakdown: same format
+  - Last 10 rounds list with date, category, difficulty, score
+  - A "strength/weakness" summary: "Starkast i: Addition ✅" / "Kan öva mer på: Division 📝"
+- A "← Tillbaka" button to return to start screen
+- A "🗑 Rensa data" button with confirmation
 
-**File: `Index.tsx`**
-- After `handleFinish`, call `saveRound` to persist the result
+**`src/lib/progressStore.ts`** — add helpers:
+- `getDetailedStats()` — returns per-category and per-difficulty aggregates
+- `clearProgress()` — clears localStorage
 
-## 4. Paus-knapp under övning
-Add a pause button that overlays a calming screen with encouraging text, giving the child a moment to breathe.
+**`src/pages/Index.tsx`** — add `'parent'` screen state, render ParentView
 
-**File: `PracticeScreen.tsx`**
-- Add a "⏸ Paus" button in the header
-- When clicked, show a full-screen overlay with soft background, a calming emoji, text like "Ta en paus! 🌸 Du gör jättebra." and a "▶ Fortsätt" button
-- Simple boolean `isPaused` state
-
----
+**`src/components/StartScreen.tsx`** — add small "📊 För vuxna" link, accepting an `onParentView` prop
 
 ## Summary of changes
 
-| File | Action |
+| File | Change |
 |---|---|
-| `src/components/StartScreen.tsx` | Add "Överraska mig!" button + stats display |
-| `src/components/PracticeScreen.tsx` | Add confetti trigger + pause button/overlay |
-| `src/components/Confetti.tsx` | New — lightweight confetti animation |
-| `src/lib/progressStore.ts` | New — localStorage save/read helpers |
-| `src/pages/Index.tsx` | Save round result after finish |
+| `src/lib/progressStore.ts` | Add `getSuggestedDifficulty()`, `getDetailedStats()`, `clearProgress()` |
+| `src/components/SummaryScreen.tsx` | Show adaptive difficulty suggestion after score |
+| `src/components/ParentView.tsx` | New — stats dashboard for parents/teachers |
+| `src/components/StartScreen.tsx` | Add "För vuxna" link |
+| `src/pages/Index.tsx` | Wire up parent view screen + pass category/difficulty to summary |
 
