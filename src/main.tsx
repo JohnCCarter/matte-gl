@@ -11,9 +11,11 @@ const isInIframe = (() => {
   }
 })();
 
+const hostname = window.location.hostname;
+const isLovableHost =
+  hostname === "lovableproject.com" || hostname.endsWith(".lovableproject.com");
 const isPreviewHost =
-  window.location.hostname.includes("id-preview--") ||
-  window.location.hostname.includes("lovableproject.com");
+  hostname.includes("id-preview--") || isLovableHost;
 
 if (isPreviewHost || isInIframe) {
   navigator.serviceWorker?.getRegistrations().then((registrations) => {
