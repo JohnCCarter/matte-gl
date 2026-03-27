@@ -63,20 +63,18 @@ export function getHints(q: MathQuestion): string[] {
         return [
           `💡 Dela upp talen! ${a} = ${aH} + ${aO} och ${b} = ${bH} + ${bO}`,
           `🧮 Lägg ihop tiotalena först: ${aH} + ${bH} = ${aH + bH}`,
-          `✨ Lägg sedan till entalena: ${aH + bH} + ${aO} + ${bO} = ${answer}`,
+          `✨ Lägg sedan till entalena: ${aH + bH} + ${aO} + ${bO}`,
         ];
       }
       return [
         `💡 Börja med det största talet: ${Math.max(a, b)}`,
         `🧮 Räkna uppåt ${Math.min(a, b)} steg`,
-        `✨ Svaret blir ${answer}!`,
       ];
     }
     case '-': {
       return [
         `💡 Tänk: vad ska du lägga till ${b} för att komma till ${a}?`,
         `🧮 Räkna uppåt från ${b}: ${b} + ? = ${a}`,
-        `✨ Svaret är ${answer}!`,
       ];
     }
     case '×': {
@@ -86,22 +84,20 @@ export function getHints(q: MathQuestion): string[] {
       return [
         `💡 Tänk på det som ${b} grupper med ${a} i varje!`,
         `🧮 Räkna steg: ${steps}...`,
-        `✨ ${a} × ${b} = ${answer}!`,
       ];
     }
     case '÷': {
       return [
         `💡 Tänk baklänges! Vad gånger ${b} blir ${a}?`,
         `🧮 Testa: ${b} × ? = ${a}`,
-        `✨ ${b} × ${answer} = ${a}, så svaret är ${answer}!`,
       ];
     }
     default:
-      return [`Svaret är ${answer}`];
+      return [`💡 Tänk efter en gång till!`];
   }
 }
 
-export const QUESTIONS_PER_ROUND = 10;
+export const QUESTIONS_PER_ROUND = 5;
 
 export const categoryLabels: Record<Category, string> = {
   addition: 'Addition & Subtraktion',
