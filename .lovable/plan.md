@@ -1,41 +1,57 @@
 
 
-## Requested Changes
+# Plan: 4 förbättringar för Matteateljén
 
-### 1. Hide the correct answer on wrong attempts
-Currently line 150 shows `Svaret är {question.answer}`. Change this to only show encouragement like "Inte riktigt! Försök igen nästa gång!" without revealing the answer.
+## 1. "Överraska mig!"-knapp på startsidan
+Add a prominent button at the top of the category list that picks a random category and difficulty, then starts immediately. Reduces decision fatigue.
 
-### 2. Remove the timer/countdown
-Remove the `<TimerBar>` component from PracticeScreen (line 102) and clean up related state (`timerReset`). This removes time pressure, which is counterproductive for a child with concentration difficulties.
+**File: `StartScreen.tsx`**
+- Add a large "🎲 Överraska mig!" button before the category cards
+- On click, randomly pick a category + difficulty and call `onStart` directly
 
-### 3. Remove answer from hints
-The last hint in each operation type in `mathEngine.ts` reveals the answer (e.g. `Svaret är ${answer}!`). Remove or rewrite those final hints to only give the strategy, not the answer.
+## 2. Konfetti-effekt vid rätt svar
+Add a lightweight canvas-based confetti burst when the child answers correctly. No external library needed — a simple particle animation using a temporary canvas overlay.
+
+**New file: `src/components/Confetti.tsx`**
+- A component that renders a full-screen canvas overlay with colorful particles
+- Auto-removes after ~2 seconds
+- Triggered by a `show` prop
+
+**File: `PracticeScreen.tsx`**
+- Import and render `<Confetti show={feedback === 'correct'} />` on correct answer
+- No sound (keeping it simple and school-friendly)
+
+## 3. Spara framsteg i localStorage
+Track completed rounds with scores so the child can see progress over time. Show a simple stats section on the start screen.
+
+**New file: `src/lib/progressStore.ts`**
+- `saveRound(category, difficulty, correct, total)` — appends to a JSON array in localStorage
+- `getStats()` — returns total rounds played, total correct, total questions, best streak
+- `getRecentRounds(n)` — returns last N rounds
+
+**File: `StartScreen.tsx`**
+- Import stats and show a small summary card below the header: "Du har spelat X omgångar! 🌟 Y rätt totalt"
+
+**File: `Index.tsx`**
+- After `handleFinish`, call `saveRound` to persist the result
+
+## 4. Paus-knapp under övning
+Add a pause button that overlays a calming screen with encouraging text, giving the child a moment to breathe.
+
+**File: `PracticeScreen.tsx`**
+- Add a "⏸ Paus" button in the header
+- When clicked, show a full-screen overlay with soft background, a calming emoji, text like "Ta en paus! 🌸 Du gör jättebra." and a "▶ Fortsätt" button
+- Simple boolean `isPaused` state
 
 ---
 
-## Concrete Suggestions for a 9-year-old with Focus Difficulties
+## Summary of changes
 
-Here are changes I can implement:
-
-**A. Fewer questions per round** — Change from 10 to 5 questions. Shorter sessions feel more achievable and reduce overwhelm.
-
-**B. Bigger, calmer UI** — Increase button/input sizes even more, reduce visual clutter (fewer colors competing for attention at once), and add more whitespace.
-
-**C. Positive-only feedback loop** — On wrong answers, show warm encouragement ("Nästan! Du är på rätt väg! 💪") without showing the answer. Let her try again on the same question (up to 2 attempts) before moving on.
-
-**D. "Try again" on wrong answer** — Instead of immediately moving to next question, let her attempt the same question again with a hint shown. This reinforces learning without frustration.
-
-**E. Streak counter with celebration** — Show a small streak counter ("3 i rad! 🌟") when she gets consecutive correct answers. Positive reinforcement for sustained focus.
-
-**F. Reduce number of categories on start screen** — Show fewer choices to avoid decision paralysis. Perhaps default to one category or show a "Surprise me!" button prominently.
-
----
-
-## Summary of File Changes
-
-| File | Change |
+| File | Action |
 |---|---|
-| `PracticeScreen.tsx` | Remove TimerBar, hide answer on wrong feedback, optionally add retry logic |
-| `mathEngine.ts` | Remove answer reveals from final hints, reduce `QUESTIONS_PER_ROUND` to 5 |
-| `TimerBar.tsx` | Can be left in place (unused) or deleted |
+| `src/components/StartScreen.tsx` | Add "Överraska mig!" button + stats display |
+| `src/components/PracticeScreen.tsx` | Add confetti trigger + pause button/overlay |
+| `src/components/Confetti.tsx` | New — lightweight confetti animation |
+| `src/lib/progressStore.ts` | New — localStorage save/read helpers |
+| `src/pages/Index.tsx` | Save round result after finish |
 
