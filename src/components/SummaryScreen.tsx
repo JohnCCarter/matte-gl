@@ -1,15 +1,22 @@
 import { ArtCanvas } from './ArtCanvas';
+import { Category, Difficulty, difficultyLabels, difficultyEmojis } from '@/lib/mathEngine';
+import { getSuggestedDifficulty } from '@/lib/progressStore';
+import { useMemo } from 'react';
 
 interface SummaryScreenProps {
   correct: number;
   total: number;
+  category: Category;
+  difficulty: Difficulty;
   onRestart: () => void;
+  onStartWithDifficulty: (difficulty: Difficulty) => void;
 }
 
-export function SummaryScreen({ correct, total, onRestart }: SummaryScreenProps) {
+export function SummaryScreen({ correct, total, category, difficulty, onRestart, onStartWithDifficulty }: SummaryScreenProps) {
   const percentage = Math.round((correct / total) * 100);
   const emoji = percentage >= 80 ? '🏆' : percentage >= 50 ? '👏' : '💪';
   const message = percentage >= 80 ? 'Fantastiskt!' : percentage >= 50 ? 'Bra jobbat!' : 'Fortsätt öva!';
+  const suggestion = useMemo(() => getSuggestedDifficulty(category, difficulty), [category, difficulty]);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen px-4 py-8">
@@ -27,6 +34,18 @@ export function SummaryScreen({ correct, total, onRestart }: SummaryScreenProps)
           </div>
           <p className="mt-2 text-sm font-body text-muted-foreground">{percentage}%</p>
         </div>
+
+        {suggestion.reason && suggestion.suggested !== difficulty && (
+          <div className="p-4 rounded-2xl bg-yellow/20 space-y-3">
+            <p className="text-sm font-body text-foreground">{suggestion.reason}</p>
+            <button
+              onClick={() => onStartWithDifficulty(suggestion.suggested)}
+              className="w-full h-12 rounded-2xl bg-accent text-accent-foreground font-bold font-body text-base shadow-playful hover:shadow-lifted active:scale-95 transition-all"
+            >
+              {difficultyEmojis[suggestion.suggested]} Testa {difficultyLabels[suggestion.suggested]}!
+            </button>
+          </div>
+        )}
 
         <div className="w-full">
           <ArtCanvas correctCount={correct} totalAnswered={total} />
