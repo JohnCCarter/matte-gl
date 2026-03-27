@@ -1,4 +1,6 @@
 import { Category, Difficulty, categoryLabels, categoryEmojis, difficultyLabels, difficultyEmojis } from '@/lib/mathEngine';
+import { getStats } from '@/lib/progressStore';
+import { useState, useMemo } from 'react';
 
 interface StartScreenProps {
   onStart: (category: Category, difficulty: Difficulty) => void;
@@ -20,18 +22,44 @@ const difficultyColors: Record<Difficulty, string> = {
   hard: 'bg-coral text-primary-foreground',
 };
 
-import { useState } from 'react';
+function handleSurprise(onStart: (cat: Category, diff: Difficulty) => void) {
+  const cat = categories[Math.floor(Math.random() * categories.length)];
+  const diff = difficulties[Math.floor(Math.random() * difficulties.length)];
+  onStart(cat, diff);
+}
 
 export function StartScreen({ onStart }: StartScreenProps) {
   const [selectedCategory, setSelectedCategory] = useState<Category | null>(null);
+  const stats = useMemo(() => getStats(), []);
 
   return (
     <div className="flex flex-col items-center px-4 py-6 min-h-screen">
       {/* Header */}
-      <div className="text-center mb-8 animate-pop-in">
+      <div className="text-center mb-6 animate-pop-in">
         <h1 className="text-4xl font-display text-foreground mb-2">🎨 Matteateljén</h1>
         <p className="text-lg font-body text-muted-foreground">Öva matte och måla!</p>
       </div>
+
+      {/* Stats */}
+      {stats.totalRounds > 0 && (
+        <div className="mb-6 px-5 py-3 rounded-2xl bg-yellow/20 text-center animate-pop-in">
+          <p className="text-sm font-body text-foreground">
+            🌟 Du har spelat <span className="font-bold">{stats.totalRounds}</span> omgångar med{' '}
+            <span className="font-bold">{stats.totalCorrect}</span> rätt av {stats.totalQuestions}!
+          </p>
+        </div>
+      )}
+
+      {/* Surprise button */}
+      {!selectedCategory && (
+        <button
+          onClick={() => handleSurprise(onStart)}
+          className="w-full max-w-sm mb-6 p-5 rounded-2xl bg-primary text-primary-foreground shadow-playful text-center transition-all active:scale-95 hover:shadow-lifted animate-pop-in"
+        >
+          <span className="text-2xl mr-3">🎲</span>
+          <span className="text-lg font-bold font-body">Överraska mig!</span>
+        </button>
+      )}
 
       {/* Category selection */}
       {!selectedCategory ? (
